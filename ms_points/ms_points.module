@@ -1,0 +1,1026 @@
+<?php
+
+/**
+ * @file
+ * modulo para administracion del sistema de puntos en la red
+ * @author Monetisoft
+*/
+
+define('REDEEM_POINTS', 'redime_puntos');
+define('ADD_POINTS', 'agrega_puntos');
+define('CREATE_USER_POINTS', 'creacion_usuario');
+define('CREATE_USER_POINTS_NEW_MONTH', 'creacion_usuario_nuevo_mes');
+define('UPDATE_USER_POINTS', 'actualizacion_usuario');
+define('SYSTEM_POINTS','sistema_puntos');
+define('RANGE_POINTS','rango_puntos');
+
+
+/*********  FUNCIONES DE SISTEMA DE PUNTOS  **********/
+
+/**
+ * Implements function ms_points_insert_user($uid)
+ * Inserta un usuario a la tabla de puntos
+ * @param (int) $uid
+ * uid del usuario
+*/
+// function ms_points_insert_user($uid, $type, $description = NULL, $accumulated_points = NULL) {
+//   // Verifico que exista el usuario
+//   if (isset($uid) && user_load($uid) && isset($type)){
+//     $user_poinst = user_load($uid);
+//     // Bandera para crear nuevo registro de mes
+//     $bool_createUser = TRUE;
+//     $bool_existUser = FALSE;
+//     // Asigno valor de nombre
+//     $name_user = $user_poinst->name;
+//     if (!empty($name_user) && isset($user_poinst->field_complete_name[LANGUAGE_NONE][0]['value'])){
+//       $name_user = $user_poinst->field_complete_name[LANGUAGE_NONE][0]['value'];
+//     }
+//     // Asigno valor de descripcion
+//     if (!isset($description)){
+//       $description = NULL;
+//     }
+//     // Asigno valor de puntos
+//     if (!isset($accumulated_points)){
+//       $accumulated_points = 0;
+//     }
+//     // Valor de puntos por defecto
+//     $default_points = 200;
+//     // Creo el historial
+//     $history = array();
+//     $history[] = array(
+//       'action' => CREATE_USER_POINTS,
+//       'date' => REQUEST_TIME,
+//       'description' => $description,
+//     );
+//     // Verifico la bandera de puntos
+//     if ($type == SYSTEM_POINTS){
+//       // Verifico que el usuario no exista en la tabla
+//       $query_points = db_select('ms_points', 'mp')
+//         ->fields('mp')
+//         ->condition('uid', $uid, '=')
+//         ->condition('user_status', 1, '=')
+//         ->execute()->fetchAll();
+
+//     }elseif ($type == RANGE_POINTS){
+//       // Obtengo los rangos de fecha (día inicial mes - día final mes )
+//       // $timestamp = REQUEST_TIME;
+//       $timestamp = strtotime('5-10-2015 00:00');//@temporal
+//       // $timestamp = strtotime('5-10-2015 00:00');//@temporal
+//       // $timestamp = strtotime('5-12-2015 00:00');//@temporal
+//       $date_range = ms_get_range_date($timestamp);
+//       // $date_range['init_date'] = strtotime('1-6-2015 00:00');//@temporal
+//       // $date_range['finish_date'] = strtotime('30-6-2015 23:59');//@temporal
+//       // $date_range['init_date'] = strtotime('1-10-2015 00:00');//@temporal
+//       // $date_range['finish_date'] = strtotime('31-10-2015 23:59');//@temporal
+//       // $date_range['init_date'] = strtotime('1-11-2015 00:00');//@temporal
+//       // $date_range['finish_date'] = strtotime('31-11-2015 23:59');//@temporal
+
+//       // Verifico que el usuario no exista en la tabla
+//       $query_points = db_select('ms_points_range', 'mpr')
+//         ->fields('mpr')
+//         ->condition('uid', $uid, '=')
+//         ->condition('user_status', 1, '=')
+//         ->condition('update_date', array($date_range['init_date'], $date_range['finish_date']), 'BETWEEN')
+//         ->execute()->fetchAll();
+//     }
+//     // Verifico si ya existe el usuario
+//     if (!empty($query_points)){
+//       // Reviso que el registro del usuario corresponda al mes actual
+//       if ($type == RANGE_POINTS){
+//         // Agrego puntos al usuario
+//         ms_points_add_points_by_uid($type, $uid, $accumulated_points);
+//         // ms_points_update_user($uid, $type, $description, $accumulated_points, 1);
+//       }
+//     }else{
+//       if ($type == SYSTEM_POINTS){
+//         // Codifico el historial
+//         $history = drupal_json_encode($history);
+//         // Initializing $record array with values.
+//         $record = array(
+//           "uid" => $uid,
+//           "name" => $name_user,
+//           "accumulated_points" => $accumulated_points,
+//           "user_status" => 1,
+//           "created" => REQUEST_TIME,
+//           "history_points" => $history,
+//         );
+//         // Inserting $record (data) into the database. Here $table variable contains the name of the table.
+//         drupal_write_record ('ms_points', $record);
+
+//       }elseif ($type == RANGE_POINTS){
+//         // Reviso el tiempo
+//         $query_update = db_select('ms_points_range', 'mpr')
+//           ->fields('mpr', array('update_date'))
+//           ->condition('uid', $uid, '=')
+//           ->condition('user_status', 1, '=')
+//           ->orderBy('id', 'ASC')
+//           ->range(0,1)
+//           ->execute()->fetchAll();
+//         // Reviso si la consulta trae valores
+//         if (!empty($query_update)){
+//           $bool_existUser = TRUE;
+//           // Verifico que el ultimo update date sea de un mes anterior al que se va crear
+//           if ($query_update[0]->update_date > $date_range['init_date']){
+//             $bool_createUser = FALSE;
+//           }
+//         }
+//         // Crea un nuevo registro solo si la bandera es correcta
+//         if ($bool_createUser == TRUE){
+//           if ($bool_existUser == TRUE){
+//             // Obtengo el historial del mes anterior
+//             $history_old = ms_points_get_history_points_by_uid($type, $uid);
+//             // Verifico que exista un historial del mes anterior
+//             if (isset($history_old) && !empty($history_old)){
+//               $history_old[] = array(
+//                 'action' => CREATE_USER_POINTS_NEW_MONTH,
+//                 'date' => REQUEST_TIME,
+//                 'description' => $description,
+//               );
+//               $history = $history_old;
+//             }
+//           }
+//           // Codifico el historial
+//           $history = drupal_json_encode($history);
+//           // $update_date = strtotime('12-10-2015 23:59');//@temporla
+//           // $update_date = strtotime('12-11-2015 23:59');//@temporla
+
+//           // Guardo los dos row para el usuario
+//           if ($bool_existUser == FALSE){
+//             // llamo la funcion que me trae la fecha del mes anterior
+//             $date_range_last = ms_get_date_last_month($timestamp);
+//             $update_last = $date_range_last['init_date'] + (60*60*24*15);
+//             // Guardo mes anterior
+//             $record = array(
+//               "uid" => $uid,
+//               "name" => $name_user,
+//               "accumulated_points" => $default_points,
+//               "user_status" => 1,
+//               "init_date" => $date_range_last['init_date'],
+//               "finish_date" => $date_range_last['finish_date'],
+//               "created" => REQUEST_TIME,
+//               "update_date" => $update_last,
+//               "history_points" => $history,
+//             );
+//             // dpm(date('d/m/Y', $date_range_last['init_date']),'fecha inicial mes anterior');
+//             // dpm(date('d/m/Y', $date_range_last['finish_date']),'fecha final mes anterior');
+//             // Inserting $record (data) into the database. Here $table variable contains the name of the table.
+//             drupal_write_record ('ms_points_range', $record);
+
+//             // Guardo mes actual
+//             $record = array(
+//               "uid" => $uid,
+//               "name" => $name_user,
+//               "accumulated_points" => $default_points + $accumulated_points,
+//               "user_status" => 1,
+//               "init_date" => $date_range['init_date'],
+//               "finish_date" => $date_range['finish_date'],
+//               "created" => REQUEST_TIME,
+//               "update_date" => $timestamp,
+//               "history_points" => $history,
+//             );
+//             // Inserting $record (data) into the database. Here $table variable contains the name of the table.
+//             drupal_write_record ('ms_points_range', $record);
+//           }
+//           else{
+//             // Agrego nuevo mes
+//             $record = array(
+//               "uid" => $uid,
+//               "name" => $name_user,
+//               "accumulated_points" => $accumulated_points,
+//               "user_status" => 1,
+//               "init_date" => $date_range['init_date'],
+//               "finish_date" => $date_range['finish_date'],
+//               "created" => REQUEST_TIME,
+//               "update_date" => $timestamp,
+//               // "update_date" => $update_date,
+//               "history_points" => $history,
+//             );
+//             // Inserting $record (data) into the database. Here $table variable contains the name of the table.
+//             drupal_write_record ('ms_points_range', $record);
+//           }
+//         }
+//       }
+//       // Getting the last inserted uid
+//       $return = $record['uid'];
+//       return $return;
+//     }
+//   }
+// }
+
+/**
+ * Implements function ms_points_add_points_by_uid($uid, $number_points_add).
+ * Agrega un número de puntos a un usuario
+ * @param (int) $uid
+ * uid del usuario
+ * @param (int) $number_points_add
+ * número de puntos a agregar
+*/
+function ms_points_add_points_by_uid($type, $uid = NULL, $number_points_add = NULL, $description = NULL) {
+  if (empty($uid)){
+    global $user;
+    $uid = $user->uid;
+  }elseif (!is_numeric($uid)){
+    return FALSE;
+  }
+  // Asigno timestamp
+  // $timestamp = REQUEST_TIME;
+  // $timestamp = strtotime('28-10-2015 23:20');//@temporal
+  // $timestamp = strtotime('28-11-2015 23:20');//@temporal
+  $timestamp = strtotime('28-12-2015 23:20');//@temporal
+
+  /***** REALIZO LA CONSULTA DE ACUERDO AL TIPO DE PUNTOS ******/
+  if ($type == SYSTEM_POINTS){
+    $query_points = db_select('ms_points', 'mp')
+        ->fields('mp')
+        ->condition('uid', $uid, '=')
+        ->condition('user_status', 1, '=')
+        ->orderBy('id', 'ASC')
+        ->range(0,1)
+        ->execute()->fetchAll();
+
+  }elseif ($type == RANGE_POINTS){
+    $date_range = ms_get_range_date($timestamp);
+    $query_points = db_select('ms_points_range', 'mpr')
+        ->fields('mpr')
+        ->condition('uid', $uid, '=')
+        ->condition('user_status', 1, '=')
+        ->condition('update_date', array($date_range['init_date'], $date_range['finish_date']), 'BETWEEN')
+        ->execute()->fetchAll();
+  }
+
+  /***** VERIFICO SI EXISTE ALGUN REGISTRO DE USUARIO ******/
+  if (!empty($query_points)){
+    /**********************
+    ***** SUMO PUNTOS *****
+    ***********************/
+    // Obtengo los puntos actuales del usuario
+    $number_points_add = !empty($number_points_add) && is_numeric($number_points_add) ? $number_points_add : 0;
+    $points_exist = ms_points_get_points_by_uid($type, $uid, $timestamp);
+    $total_points = $points_exist + $number_points_add;
+    // Verifico el tipo de puntos
+    if ($type == SYSTEM_POINTS){
+      $query_update = db_update('ms_points')
+        ->fields(array(
+          'accumulated_points' => $total_points,
+        ))
+        ->condition('uid', $uid, '=')
+        ->condition('user_status', 1, '=')
+        ->execute();
+    }elseif ($type == RANGE_POINTS){
+      // dpm('ingreso para actualizar');
+      $date_range = ms_get_range_date($timestamp);
+      $query_update = db_update('ms_points_range')
+        ->fields(array(
+          'accumulated_points' => $total_points,
+        ))
+        ->condition('uid', $uid, '=')
+        ->condition('user_status', 1, '=')
+        ->condition('update_date', array($date_range['init_date'], $date_range['finish_date']), 'BETWEEN')
+        ->execute();
+    }
+    // Actualizo el historial de puntos del usuario
+    $action = ADD_POINTS;
+    ms_points_update_history_user($uid, $action, $number_points_add, $type, $timestamp);
+  }else{
+    /*****************************************
+    ***** CREO NUEVO REGISTRO DE USUARIO *****
+    ******************************************/
+    // Si ingresa aqui es por que no existe el usuario o no existe un registro en el mes actual
+    if (isset($uid) && user_load($uid) && isset($type)){
+      // Cargo el usuario
+      $user_poinst = user_load($uid);
+      // Asigno valor de nombre
+      $name_user = $user_poinst->name;
+      if (!empty($name_user) && isset($user_poinst->field_complete_name[LANGUAGE_NONE][0]['value'])){
+        $name_user = $user_poinst->field_complete_name[LANGUAGE_NONE][0]['value'];
+      }
+      // Asigno valor de puntos
+      if (!isset($accumulated_points)){
+        $accumulated_points = 0;
+      }
+    }
+    /****** INSERTO EL NUEVO REGISTRO DE ACUERDO A EL TIPO DE PUNTOS ******/
+    if ($type == SYSTEM_POINTS){
+      // Creo el historial
+      $history = array();
+      $history[] = array(
+        'action' => CREATE_USER_POINTS,
+        'date' => REQUEST_TIME,
+        'description' => NULL,
+      );
+      // Codifico el historial
+      $history = drupal_json_encode($history);
+      // Initializing $record array with values.
+      $record = array(
+        "uid" => $uid,
+        "name" => $name_user,
+        "accumulated_points" => $accumulated_points,
+        "user_status" => 1,
+        "created" => REQUEST_TIME,
+        "history_points" => $history,
+      );
+      // Inserting $record (data) into the database. Here $table variable contains the name of the table.
+      drupal_write_record ('ms_points', $record);
+    }elseif ($type == RANGE_POINTS){
+      dpm('ingreso a crear nuevo registro');
+      // Verifico que el usuario si exista en la tabla
+      $query_points = db_select('ms_points_range', 'mpr')
+        ->fields('mpr')
+        ->condition('uid', $uid, '=')
+        ->condition('user_status', 1, '=')
+        ->execute()->fetchAll();
+      // Si existe el usuario en la tabla de rangos
+      if (!empty($query_points) && is_array($query_points)){
+        // Creo el historial
+        $history = array();
+        // Obtengo el historial del mes anterior
+        $history_old = ms_points_get_history_points_by_uid($type, $uid);
+        // Verifico que exista un historial del mes anterior
+        if (isset($history_old) && !empty($history_old)){
+          $history_old[] = array(
+            'action' => CREATE_USER_POINTS_NEW_MONTH,
+            'date' => REQUEST_TIME,
+            'description' => $description,
+          );
+          $history = $history_old;
+        }
+        // Codifico el historial
+        $history = drupal_json_encode($history);
+        // Agrego nuevo mes
+        $record = array(
+          "uid" => $uid,
+          "name" => $name_user,
+          "accumulated_points" => $number_points_add,
+          "user_status" => 1,
+          "init_date" => $date_range['init_date'],
+          "finish_date" => $date_range['finish_date'],
+          "created" => REQUEST_TIME,
+          "update_date" => $timestamp,
+          "history_points" => $history,
+        );
+        // Inserting $record (data) into the database. Here $table variable contains the name of the table.
+        drupal_write_record ('ms_points_range', $record);
+      }
+    }
+  }
+}
+
+/**
+ * Implements function ms_points_redeem_points_by_uid($uid, $number_points_remove).
+ * Redime un número de puntos de un usuario
+ * @param (int) $uid
+ * uid del usuario
+ * @param (int) $number_points_remove
+ * número de puntos a redimir
+*/
+function ms_points_redeem_points_by_uid($uid = NULL, $number_points_remove = NULL) {
+  // Asigno valor a uid
+  if (empty($uid)){
+    global $user;
+    $uid = $user->uid;
+  }elseif (!is_numeric($uid)){
+    return FALSE;
+  }
+  // Asigno el type
+  $type = SYSTEM_POINTS;
+  // Asigno timestamp
+  // $timestamp = REQUEST_TIME;
+  $timestamp = strtotime('28-10-2015 23:20');//@temporal
+  // $timestamp = strtotime('28-11-2015 23:20');//@temporal
+  // $timestamp = strtotime('28-12-2015 23:20');//@temporal
+
+  /****** REALIZO LA CONSULTA PARA SABER SI EXISTE EL USUARIO ******/
+  $query_points = db_select('ms_points', 'mp')
+      ->fields('mp')
+      ->condition('uid', $uid, '=')
+      ->condition('user_status', 1, '=')
+      ->orderBy('id', 'ASC')
+      ->range(0,1)
+      ->execute()->fetchAll();
+  // Verifico si existe un usuario
+  if (!empty($query_points)){
+    // Obtengo los puntos actuales del usuario
+    $number_points_remove = !empty($number_points_remove) && is_numeric($number_points_remove) ? $number_points_remove : 0;
+    $points_exist = ms_points_get_points_by_uid($type, $uid, $timestamp);
+    $total_points = $points_exist - $number_points_remove;
+    // Verifico si el total de puntos es menor a cero
+    if ($total_points < 0){
+      $total_points = 0;
+    }
+    // Actualizo dependiendo de la bandera
+    $query_update = db_update('ms_points') // Table name no longer needs {}
+      ->fields(array(
+        'accumulated_points' => $total_points,
+      ))
+      ->condition('uid', $uid, '=')
+      ->condition('user_status', 1, '=')
+      ->execute();
+    // Actualizo el historial de puntos del usuario
+    $action = REDEEM_POINTS;
+    ms_points_update_history_user($uid, $action, $number_points_remove, $type, $timestamp);
+  }
+}
+
+/**
+ * Implements function ms_points_get_points_by_uid($uid)
+ * Obtiene el número de puntos de un usuario
+ * @param (int) $uid
+ * uid del usuario
+ * @return (int - bool) $return
+ * Número de puntos del usuario o FALSE en caso de error
+*/
+function ms_points_get_points_by_uid($type, $uid = NULL, $timestamp = NULL) {
+  // Declaro return
+  $return = FALSE;
+  // Reviso uid
+  if (empty($uid)){
+    global $user;
+    $uid = $user->uid;
+  }elseif (!is_numeric($uid)){
+    return FALSE;
+  }
+  if ($type == SYSTEM_POINTS){
+    $query_points = db_select('ms_points', 'mp')
+      ->fields('mp', array('accumulated_points'))
+      ->condition('uid', $uid, '=')
+      ->condition('user_status', 1, '=')
+      ->execute()->fetchAll();
+
+  }elseif ($type == RANGE_POINTS){
+    // Asigno valor a timestamp, si existe
+    if (!isset($timestamp)){
+      $timestamp = REQUEST_TIME;
+    }
+    // Obtengo los rangos de fecha
+    $date_range = ms_get_range_date($timestamp);
+    // Declaro la consulta
+    $query_points = db_select('ms_points_range', 'mpr')
+      ->fields('mpr', array('accumulated_points'))
+      ->condition('uid', $uid, '=')
+      ->condition('user_status', 1, '=')
+      ->condition('update_date', array($date_range['init_date'], $date_range['finish_date']), 'BETWEEN')
+      ->execute()->fetchAll();
+  }
+  // Verifico la consulta
+  if (!empty($query_points) && is_array($query_points)){
+    $return = $query_points[0]->accumulated_points;
+  }
+  return $return;
+}
+
+/**
+ * Implements function ms_points_get_history_points_by_uid($uid)
+ * Obtiene el historial de puntos del usuario
+ * @param (int) $uid
+ * uid del usuario
+*/
+function ms_points_get_history_points_by_uid($type, $uid = NULL) {
+  // Declaro return
+  $return = FALSE;
+  // Asigno uid (en caso que no exista)
+  if (empty($uid)){
+    global $user;
+    $uid = $user->uid;
+  }elseif (!is_numeric($uid)){
+    return $return;
+  }
+  if ($type == SYSTEM_POINTS){
+    $query_points = db_select('ms_points', 'mp')
+      ->fields('mp', array('history_points'))
+      ->condition('uid', $uid, '=')
+      ->condition('user_status', 1, '=')
+      ->execute()->fetchAll();
+
+  }elseif ($type == RANGE_POINTS){
+    $query_points = db_select('ms_points_range', 'mp')
+      ->fields('mp', array('history_points'))
+      ->condition('uid', $uid, '=')
+      ->condition('user_status', 1, '=')
+      ->orderBy('id', 'DESC')
+      ->range(0,1)
+      ->execute()->fetchAll();
+  }
+
+  if (!empty($query_points) && is_array($query_points)){
+    // dpm($query_points,'query points en get historial');
+    $return = $query_points[0]->history_points;
+    $return = drupal_json_decode($return);
+  }
+  return $return;
+}
+
+
+/**
+ * Implements function ms_points_update_user($uid, $name_user = NULL, $accumulated_points = NULL, $user_status = NULL)
+ * Actualiza la información del usuario
+ * @param (int) $uid
+ * uid del usuario
+ * @param (string) $name_user
+ * Nombre del usuario
+ * @param (int) $accumulated_points
+ * Número de puntos acumulados
+ * @param (int) $user_status
+ * Puede ser 1 o 0 para activar o desactivar el usuario
+*/
+function ms_points_update_user($uid, $type, $name_user = NULL, $description = NULL, $accumulated_points = NULL, $user_status = NULL){
+  $user_poinst = user_load($uid);
+  // Asigno nombre de usuario.
+  if (!isset($name_user)){
+     $name_user = $user_poinst->name;
+    if (!empty($name_user) && isset($user_poinst->field_complete_name[LANGUAGE_NONE][0]['value'])){
+      $name_user = $user_poinst->field_complete_name[LANGUAGE_NONE][0]['value'];
+    }
+  }
+  // Asigno descripción del registro
+  if (!isset($description)){
+    $description = NULL;
+  }
+  // Create array info update
+  $fields_upd = array(
+    'uid' => $uid,
+    'name' => $name_user,
+  );
+  // Reviso si existe puntos acumulados
+  if (isset($accumulated_points)){
+    $fields_upd['accumulated_points'] = $accumulated_points;
+  }
+  // Reviso si existe estado de usuario
+  if (isset($user_status)){
+    $fields_upd['user_status'] = $user_status;
+  }
+  // Revisa el tipo de sistema de puntos
+  if ($type == SYSTEM_POINTS){
+    // Obtengo el historial actual del usuario
+    $history = db_select('ms_points', 'mp')
+        ->fields('mp', array('history_points'))
+        ->condition('uid', $uid, '=')
+        ->condition('user_status', 1, '=')
+        ->execute()->fetchAll();
+
+  }elseif ($type == RANGE_POINTS){
+    $timestamp_upd = REQUEST_TIME;
+    // Obtengo los rangos de fecha
+    $date_range = ms_get_range_date($timestamp_upd);
+    // $date_range['init_date'] = strtotime('1-10-2015 00:00');//@temporal
+    // $date_range['finish_date'] = strtotime('31-10-2015 23:59');//@temporal
+    // $date_range['init_date'] = strtotime('1-11-2015 00:00');//@temporal
+    // $date_range['finish_date'] = strtotime('31-11-2015 23:59');//@temporal
+
+    // Obtengo el historial actual del usuario
+    $history = db_select('ms_points_range', 'mpr')
+      ->fields('mpr', array('history_points'))
+      ->condition('uid', $uid, '=')
+      ->condition('user_status', 1, '=')
+      ->condition('update_date', array($date_range['init_date'], $date_range['finish_date']), 'BETWEEN')
+      ->execute()->fetchAll();
+  }
+  // Verifico si se obtiene algo de la consulta
+  if (!empty($history)){
+    $history_points = $history[0]->history_points;
+    $history_points = drupal_json_decode($history_points);
+    // Agrego el nuevo registro al historial del usuario
+    $history_points[] = array(
+      'action' => UPDATE_USER_POINTS,
+      'date' => $timestamp_upd,
+      'description' => $description,
+    );
+    if (isset($history_points) && !empty($history_points)){
+      $fields_upd['history_points'] = drupal_json_encode($history_points);
+    }
+  }
+  // Actualizo el registro de puntos de usuario
+  if ($type == SYSTEM_POINTS){
+    // Query update
+    $query_update = db_update('ms_points')
+      ->fields($fields_upd)
+      ->condition('uid', $uid, '=')
+      ->execute();
+  }elseif ($type == RANGE_POINTS){
+    // Query update
+    $query_update = db_update('ms_points_range')
+      ->fields($fields_upd)
+      ->condition('uid', $uid, '=')
+      ->condition('update_date', array($date_range['init_date'], $date_range['finish_date']), 'BETWEEN')
+      ->execute();
+  }
+}
+
+
+/**
+ * Implements function ms_points_update_history_user($uid = NULL, $action = NULL, $number_points = NULL)
+ * Actualiza el historial de puntos del usuario solo utilizado para agregar y redimir puntos
+ * @param (int) $uid
+ * uid del usuario
+ * @param (string) $action
+ * accion que se va ingresar (redimir o agregar)
+ * @param (int) $number_points
+ * Número de puntos a utilizar
+*/
+function ms_points_update_history_user($uid, $action, $number_points, $type, $timestamp, $description = NULL) {
+  $return = FALSE;
+  // Si estan todos los parametros
+  if (!empty($uid) && is_numeric($uid) && !empty($action) && !empty($number_points) && is_numeric($number_points) && !empty($type)){
+    // Asigno valor de descripcion
+    if(!isset($description)){
+      $description = NULL;
+    }
+    // Verifico el tipo de sistema de puntos
+    if ($type == SYSTEM_POINTS){
+      $update_history = db_select('ms_points', 'm')
+        ->fields('m')
+        ->condition('uid', $uid, '=')
+        ->condition('user_status', 1, '=')
+        ->execute()->fetchAll();
+
+    }elseif ($type == RANGE_POINTS){
+      $date_range = ms_get_range_date($timestamp);
+      $update_history = db_select('ms_points_range', 'm')
+        ->fields('m')
+        ->condition('uid', $uid, '=')
+        ->condition('user_status', 1, '=')
+        ->condition('update_date', array($date_range['init_date'], $date_range['finish_date']), 'BETWEEN')
+        ->execute()->fetchAll();
+    }
+    // Verifico que exista un historial para agregar nuevo log
+    if (!empty($update_history) && is_array($update_history)){
+        $history = $update_history[0]->history_points;
+        $history = drupal_json_decode($history);
+        $history[] = array(
+          'action' => $action,
+          'number_points' => $number_points,
+          'date' => REQUEST_TIME,
+          'description' => $description,
+        );
+        $history = drupal_json_encode($history);
+    }
+    // Si existe un historial lo actualizo
+    if (isset($history) && !empty($history)){
+      if ($type == SYSTEM_POINTS){
+        $query_update = db_update('ms_points')
+          ->fields(array(
+            'history_points' => $history,
+          ))
+          ->condition('uid', $uid, '=')
+          ->condition('user_status', 1, '=')
+          ->execute();
+      }elseif ($type == RANGE_POINTS){
+        $query_update = db_update('ms_points_range')
+          ->fields(array(
+            'history_points' => $history,
+          ))
+          ->condition('uid', $uid, '=')
+          ->condition('user_status', 1, '=')
+          ->condition('update_date', array($date_range['init_date'], $date_range['finish_date']), 'BETWEEN')
+          ->execute();
+      }
+      $return = TRUE;
+    }
+  }
+  return $return;
+}
+
+/**
+ * function ms_points_update_user_status($user_status, $type, $uid = NULL)
+ * funcion que me actualiza el estado del usuario
+ * @param (int) $user_status (0-1)
+ * Estado que se le quiere asignar al usuario
+ * @param (string) $type
+ * Es el tipo de sistema de puntos a usar (rango de puntos ó sistema de puntos)
+ * @param (int) $uid
+ * Es el uid del usuario al cual se le cambia el estado
+ *
+ */
+function ms_points_update_user_status($user_status, $type, $uid = NULL) {
+  // Verifico que si se obtenga un estado de usuario
+  if (isset($user_status)){
+    if (empty($uid)){
+      global $user;
+      $uid = $user->uid;
+    }
+    // Verifico el uid
+    if (is_numeric($uid)){
+      // Actualizo el estado del usuario dependiendo de la bandera de puntos
+      if ($type == SYSTEM_POINTS){
+        $query_update = db_update('ms_points')
+          ->fields(array(
+            'user_status' => $user_status,
+          ))
+          ->condition('uid', $uid, '=')
+          ->execute();
+      }elseif ($type == RANGE_POINTS){
+        $query_update = db_update('ms_points_range')
+          ->fields(array(
+            'user_status' => $user_status,
+          ))
+          ->condition('uid', $uid, '=')
+          ->execute();
+      }
+    }
+  }
+}
+
+/******** FUNCIONES PARA EL RANGO DE SISTEMA DE PUNTOS **********/
+
+/**
+ *
+ */
+function ms_points_initiate($uid = NULL) {
+  // Verifico que si se obtenga un estado de usuario
+  if (empty($uid)){
+    dpm('ingreso por vacio');
+    global $user;
+    $uid = $user->uid;
+  }
+  // Verifico que exista el usuario
+  if (is_numeric($uid) && user_load($uid)){
+    // Cargo el usuario
+    $user_poinst = user_load($uid);
+    // Asigno valor de nombre
+    $name_user = $user_poinst->name;
+    if (!empty($name_user) && isset($user_poinst->field_complete_name[LANGUAGE_NONE][0]['value'])){
+      $name_user = $user_poinst->field_complete_name[LANGUAGE_NONE][0]['value'];
+    }
+    // Valor de puntos por defecto
+    $default_points = 200;
+    // Creo el historial
+    $history = array();
+    $history[] = array(
+      'action' => CREATE_USER_POINTS,
+      'date' => REQUEST_TIME,
+      'description' => NULL,
+    );
+    $history = drupal_json_encode($history);
+
+    // Verifico que el usuario no exista en la tabla
+    $query_points_rg = db_select('ms_points_range', 'mpr')
+      ->fields('mpr')
+      ->condition('uid', $uid, '=')
+      ->condition('user_status', 1, '=')
+      ->execute()->fetchAll();
+
+    // Verifico si el usuario no existe
+    if (empty($query_points_rg)){
+      // Obtengo los rangos de fecha del mes actual y del mes anterior (todo en base a la fecha de creacion del usuario)
+      $dateCreatedUser = $user_poinst->created;
+      $date_range_current = ms_get_range_date($dateCreatedUser);
+      $date_range_last = ms_get_date_last_month($dateCreatedUser);
+      $dateCreatedUserLast = $date_range_last['init_date'] + (60*60*24*1);
+      // Guardo mes anterior
+      $record = array(
+        "uid" => $uid,
+        "name" => $name_user,
+        "accumulated_points" => $default_points,
+        "user_status" => 1,
+        "init_date" => $date_range_last['init_date'],
+        "finish_date" => $date_range_last['finish_date'],
+        "created" => REQUEST_TIME,
+        "update_date" => $dateCreatedUserLast,
+        "history_points" => $history,
+      );
+      // dpm(date('d/m/Y', $date_range_last['init_date']),'fecha inicial mes anterior');
+      // dpm(date('d/m/Y', $date_range_last['finish_date']),'fecha final mes anterior');
+      // Inserting $record (data) into the database. Here $table variable contains the name of the table.
+      drupal_write_record ('ms_points_range', $record);
+
+      // Guardo mes actual
+      $record = array(
+        "uid" => $uid,
+        "name" => $name_user,
+        "accumulated_points" => $default_points,
+        "user_status" => 1,
+        "init_date" => $date_range_current['init_date'],
+        "finish_date" => $date_range_current['finish_date'],
+        "created" => REQUEST_TIME,
+        "update_date" => $dateCreatedUser,
+        "history_points" => $history,
+      );
+      // Inserting $record (data) into the database. Here $table variable contains the name of the table.
+      drupal_write_record ('ms_points_range', $record);
+    }
+  }
+}
+
+/**
+ *
+ */
+// function ms_points_add_points_range($uid = NULL, $number_points = NULL) {
+//   // Verifico que si se obtenga un estado de usuario
+//   if (empty($uid)){
+//     global $user;
+//     $uid = $user->uid;
+//   }
+//   // Verifico el uid
+//   if (is_numeric($uid)){
+//     // Funcion que inserta un usuario
+//     ms_points_insert_user($uid, RANGE_POINTS, NULL, $number_points);
+//   }
+// }
+
+/**
+ * Implements function ms_points_stactic_get_percentage_commission
+ * Funcion estatica que me retorna el porcentaje de comision de acuerdo a el numero de puntos en el mes.
+ * @see drupal_static
+ */
+function ms_points_stactic_get_percentage_commission() {
+  $percentage = &drupal_static(__FUNCTION__);
+  if (!$percentage) {
+    global $user;
+    $user = user_load($user->uid);
+    $uid = $user->uid;
+    // Obtengo el número de puntos del mes anterior
+    $time = REQUEST_TIME;
+    // $time = strtotime('28-11-2015 20:20');
+    $range_last = ms_get_date_last_month($time);
+    // Primer dia del mes anterior
+    $timestamp_last = $range_last['init_date'] + (60*60*24*1);
+    $number_points = ms_points_get_points_by_uid(RANGE_POINTS, $uid, $timestamp_last);
+    dpm($number_points . 'numero de puntos estatica');
+    /********* OBTENGO EL PORCENTAJE DE COMISION ******/
+    if (strlen($number_points) == 0){
+      $number_points = 0;
+    }
+    // Rango de 0 - 99
+    if ($number_points >= 0 && $number_points <= 99){
+      $percentage = 2.0;
+    }
+    // Rango de 100 - 199
+    elseif ($number_points > 99 && $number_points <= 199){
+      $percentage = 3.0;
+    }
+    // Rango mayor de 200
+    elseif ($number_points > 199){
+      $percentage = 3.5;
+    }
+  }
+  return $percentage;
+}
+
+/**
+ * ms_points_get_percentage_commission($uid = NULL)
+ * Funcion que retorna el porcentaje de comisiones
+ * @param (int ) $uid
+ * uid del usuario
+ * @return (float) $percentage
+ * Retorno el porcentaje de  comisión
+ */
+function ms_points_get_percentage_commission($uid = NULL) {
+  // Verifico que si se obtenga un estado de usuario
+  if (empty($uid)){
+    global $user;
+    $uid = $user->uid;
+  }
+  // Verifico el uid
+  if (is_numeric($uid)){
+    // Obtengo el número de puntos del mes anterior
+    $time = REQUEST_TIME;
+    // $time = strtotime('25-1-2016 20:20');
+    $range_last = ms_get_date_last_month($time);
+    // Primer dia del mes anterior
+    $timestamp_last = $range_last['init_date'] + (60*60*24*1);
+    // dpm(date('d/m/Y',$timestamp_last),'fecha mes anterior');
+    $number_points = ms_points_get_points_by_uid(RANGE_POINTS, $uid, $timestamp_last);
+    // dpm($number_points, 'number points en dinamica');
+
+    /********* OBTENGO EL PORCENTAJE DE COMISION ******/
+    if (strlen($number_points) == 0){
+      $number_points = 0;
+    }
+    // Rango de 0 - 99
+    if ($number_points >= 0 && $number_points <= 99){
+      $percentage = 2.0;
+    }
+    // Rango de 100 - 199
+    elseif ($number_points > 99 && $number_points <= 199){
+      $percentage = 3.0;
+    }
+    // Rango mayor de 200
+    elseif ($number_points > 199){
+      $percentage = 3.5;
+    }
+    return $percentage;
+  }
+}
+
+
+/******** FUNCIONES PARA MANEJO DE TIEMPO **********/
+
+/**
+ *
+ */
+function ms_get_date_last_month($timestamp){
+  $day_current = date('d', $timestamp);
+  $date_range_last = ms_get_range_date($timestamp - (60*60*24*($day_current + 1)));
+  return $date_range_last;
+}
+
+/**
+ * function ms_get_range_date($timestamp)
+ * Funcion que me trae la fecha inicial y fecha final del mes al cual corresponde el timestamp
+ * @param (int - date) $timestamp
+ * Fecha en formato timestamp
+ * @return (array) $return
+ * Retorno un arreglo con la fecha inicial y final del mes
+ */
+function ms_get_range_date($timestamp){
+  // 15/09/2015 14:51 // Revisar
+  // Defino variables
+  $return = 'error';
+  $month = date('m', $timestamp);
+  $year = date('Y', $timestamp);
+  // $day = date('d', $timestamp);
+  $day = date("d", mktime(0,0,0, $month+1, 0, $year));
+  $hour = date('H', $timestamp);
+  $minute = date('i', $timestamp);
+
+  // Verifico que esten correctas todas las variables
+  if (is_numeric($month) && is_numeric($day) && is_numeric($year) && is_numeric($hour) && is_numeric($minute)){
+    // Variables definifas
+    $oneDay = 1;
+    $twyEigthDay = 28;
+    $twyNineDay = 29;
+    $thirtyDay = 30;
+    $thtyOneDay = 31;
+
+    dpm($month,'mes');
+    dpm($day,'dia');
+    dpm($year,'año');
+    dpm($hour,'hora');
+    dpm($minute,'minutos');
+
+    // Variables de tiempo
+    $hour_init = $hour * 60 * 60;
+    dpm($hour_init,'hour init');
+    $minu_init = ($minute) * 60;
+    dpm($minu_init,'minute init');
+    $hour_finish = $hour - 23;
+    $hour_finish = $hour_finish < 0 ? $hour_finish * (-1) : $hour_finish;
+    $hour_finish = $hour_finish * 60 * 60;
+    $minu_finish = $minute - 59;
+    $minu_finish = $minu_finish < 0 ? $minu_finish * (-1) : $minu_finish;
+    $minu_finish = $minu_finish * 60;
+    // Fecha de inicio
+    $diffDays_init = $day - $oneDay;
+    $diffDays_init = 60 * 60 * 24 * $diffDays_init;
+    dpm($diffDays_init,'diff init');
+    dpm($diffDays_init + $hour_init + $minu_init,'total');
+    $date_init = $timestamp - ($diffDays_init + $hour_init + $minu_init);
+    // $date_init = $timestamp - ($diffDays_init + (60*60*23) + 60*20);
+    dpm(date('d/m/Y H:i',$date_init), 'inicial fecha mes');
+    // Mes de 28 dias
+    if ($month == 2){
+      $diffDays_finish = $day - $twyEigthDay;
+      $diffDays_finish = $diffDays_finish < 0 ? $diffDays_finish * (-1) : $diffDays_finish;
+      $date_finish = $timestamp + (60 * 60 * 24 * $diffDays_finish + $hour_finish + $minu_finish);
+      // dpm(date('d/m/Y H:i',$date_finish), 'final fecha meses de 28 dias');
+    }
+    // Si es año visciesto
+    if ($year % 4 == 0){
+      if ($month == 2){
+        if ($day > 0 && $day < 29){
+          $diffDays_finish = $day - $twyNineDay;
+          $diffDays_finish = $diffDays_finish < 0 ? $diffDays_finish * (-1) : $diffDays_finish;
+          $date_finish = $timestamp + (60 * 60 * 24 * $diffDays_finish + $hour_finish + $minu_finish);
+          // dpm(date('d/m/Y H:i',$date_finish), 'final fecha mes de 28 dias visciesto');
+        }
+      }
+    }
+    // Meses de 31 días
+    if ($month == 1 or $month == 3 or $month == 5 or $month == 7 or $month == 8 or $month == 10 or $month == 12){
+      $diffDays_finish = $day - $thtyOneDay;
+      $diffDays_finish = $diffDays_finish < 0 ? $diffDays_finish * (-1) : $diffDays_finish;
+      $date_finish = $timestamp + (60 * 60 * 24 * $diffDays_finish + $hour_finish + $minu_finish);
+      // dpm(date('d/m/Y H:i',$date_finish), 'final fecha meses de 31 dias');
+    }
+    // Meses de 30 días
+    if ($month == 4 or $month == 6 or $month == 9 or $month == 11){
+      $diffDays_finish = $day - $thirtyDay;
+      $diffDays_finish = $diffDays_finish < 0 ? $diffDays_finish * (-1) : $diffDays_finish;
+      $date_finish = $timestamp + (60 * 60 * 24 * $diffDays_finish + $hour_finish + $minu_finish);
+      // dpm(date('d/m/Y H:i',$date_finish), 'final fecha meses de 31 dias');
+    }
+    $return = array(
+      'init_date' => $date_init,
+      'finish_date' => $date_finish,
+    );
+  }
+  // $month = date('m',$timestamp);
+  // $year = date('Y',$timestamp);
+  // $day = date("d", mktime(0, 0, 0, $month+1, 0, $year));
+  // $date_finish = date('Y-m-d', mktime(0,0,0, $month, $day, $year));
+  // // $date_init = date('Y-m-d H:i', mktime(0,0,0, $month, 1, $year));
+  // dpm(date('d/m/Y H:i',$date_finish),'final mes funcion');
+  return $return;
+}
+
+
+function _data_last_month_day($timestamp) {
+$month = date('m',$timestamp);
+$year = date('Y',$timestamp);
+$day = date("d", mktime(0,0,0, $month+1, 0, $year));
+dpm($month,'mes');
+dpm($year,'año');
+dpm($day,'dia');
+
+
+return date('Y-m-d', mktime(0,0,0, 1, 31, 2015));
+};

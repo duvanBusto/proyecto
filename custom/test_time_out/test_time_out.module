@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * @file
+ * modulo para administracion de usuarios especiales cabezas de red
+ * @author Jair Hernandez Dodino, Duvan Bustos
+ * Monetisoft
+*/
+// Constants reports
+define('MS_REGISTER_USER_NW_SPECIAL','users_network');
+define('MS_REGISTER_ORDERS_NW_SPECIAL','providers_orders');
+
+/**
+ * Implements hook_menu().
+ */
+function test_time_out_menu() {
+  // General information network
+  $items['test/time_out'] = array(
+    'title' => 'Administración',
+    'page callback' => 'mg_test_time_out',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['test/ajax'] = array(
+    'title' => 'Administración',
+    'page callback' => 'test_ajax_callback',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['test/pruebas'] = array(
+    'title' => 'Administración',
+    'page callback' => 'test_pruebas',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+function test_pruebas(){
+  $content = array(
+    '#prefix' => '<div class="alert-success wrapper-page-time">',
+    '#suffix' => '</div>',
+    '#markup' => 'hola, funciona la prueba',
+  );//
+  $palabra = dropAccents('BÓGÓTÁü');
+  dpm($palabra);
+  $palabra = dropAccents('niñÑos');
+  dpm($palabra);
+  return $content;
+}
+
+function dropAccents($incoming_string){
+  $tofind = "ÀÁÂÄÅàáâäÒÓÔÖòóôöÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿ";
+  $replac = "AAAAAaaaaOOOOooooEEEEeeeeCcIIIIiiiiUUUUuuuuy";
+  return utf8_encode(strtr(utf8_decode($incoming_string), utf8_decode($tofind), $replac));
+}
+
+function mg_test_time_out(){
+  drupal_add_js(drupal_get_path('module', 'test_time_out') . '/js/test_time_out.js');
+  $content = array(
+    '#prefix' => '<div class="alert-success wrapper-page-time">',
+    '#suffix' => '</div>',
+    '#markup' => l(t('prueba ajax'), '', array('attributes' => array('class' => array('test-ajax-time')))),
+  );
+  return $content;
+}
+
+function commerce_visacheckout_prueba_algo_test(){
+  $content = array(
+    '#prefix' => '<div class="alert-success wrapper-page-time">',
+    '#suffix' => '</div>',
+    '#markup' => 'hola, funciona la prueba',
+  );//
+  return $content;
+}
+
+function test_ajax_callback(){
+  for ($i=1; $i < 11 ; $i++) {
+    usleep(500000);
+    drupal_json_output($i);
+  }
+}
+
+function ciclo($inicio = NULL){
+  sleep(1);
+  $i = !empty($inicio) ? $inicio + 1 : 1;
+  // set_time_limit(600);
+  for ($i; $i <= 4000; $i++) {
+    if ($i % 500 == 0){
+      dpm($i,'entro');
+      return $i;
+    }
+  }
+}
+
+
+
+

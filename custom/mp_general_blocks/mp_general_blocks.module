@@ -1,0 +1,666 @@
+<?php
+/**
+ * @file.
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+function mp_general_blocks_block_info() {
+  $block = array();
+  $block['mp_header_logo'] = array(
+    'info' => 'Block mp - Logo del header',
+    'cache' => DRUPAL_CACHE_GLOBAL,
+  );
+  $block['mp_banner_block'] = array(
+    'info' => 'Block mp - Header: Banner page',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $block['mp_home_social_block'] = array(
+    'info' => 'Block mp - Header: Bloque para visualizar las redes sociales',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $block['mp_menu_first_footer'] = array(
+    'info' => 'Block mp - footer: Bloque que muestra el menu primario del footer',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $block['mp_menu_second_footer'] = array(
+    'info' => 'Block mp - footer: Bloque que muestra el menu secundario del footer',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $block['mp_menu_contactInfo_footer'] = array(
+    'info' => 'Block mp - footer: Bloque que muestra la información de contacto de la web.',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $block['mp_social_icons'] = array(
+    'info' => 'Block mp - social icons: Bloque que muestra las redes sociales.',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $block['mp_test_aside'] = array(
+    'info' => 'Block mp - Test aside',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  // $block['mp_country_footer_menu'] = array(
+  //   'info' => 'Block mp - Monetisoft Country Footer Menu: Monetisoft Country Footer Menu',
+  //   'cache' => DRUPAL_NO_CACHE,
+  // );
+  // $block['mp_contact_map_block'] = array(
+  //   'info' => 'Block mp - My contact map block: My contact map block page',
+  //   'cache' => DRUPAL_NO_CACHE,
+  // );
+  // $block['mp_footer_logo'] = array(
+  //   'info' => 'Block mp - Logo MS in footer',
+  //   'cache' => DRUPAL_CACHE_GLOBAL,
+  // );
+
+  return $block;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function mp_general_blocks_block_view($delta, $node = NULL) {
+  $block = array();
+  switch ($delta) {
+    case 'mp_header_logo':
+      $logo = drupal_get_path('module', 'mp_general_blocks') . '/img/logo_header.png';
+      $logo = theme(
+        'image',
+        array(
+          'path' => $logo,
+          'alt' => 'My company',
+          'text' => 'My company',
+          'width' => 100,
+          'height' => 80,
+        )
+      );
+      $block['content'][0] = array(
+        '#prefix' => '<div class="logo-header">',
+        '#suffix' => '</div>',
+        '#markup' => l($logo, '', array('html' => TRUE)),
+      );
+      break;
+
+    case 'mp_banner_block':
+      $structure = mp_get_structure_banner();
+      $block['subject'] = NULL;
+      $block['content'][0] = $structure;
+      break;
+
+    case 'mp_home_social_block':
+      $block['content'][0] = mp_blocks_social_content();
+      break;
+
+    case 'mp_menu_first_footer':
+      $block['subject'] = NULL;
+      $block['content'][0] = mp_blocks_menu_footer_first();
+      break;
+
+    case 'mp_menu_second_footer':
+      $block['subject'] = NULL;
+      $block['content'][0] = mp_blocks_menu_footer_second();
+      break;
+
+    case 'mp_menu_contactInfo_footer':
+      $block['subject'] = NULL;
+      $block['content'][0] = mp_blocks_contact_info_footer_third();
+      break;
+
+    case 'mp_social_icons':
+      $block['subject'] = NULL;
+      $block['content'][0] = mp_blocks_structure_social_icons();
+      break;
+
+    case 'mp_test_aside':
+      $block['subject'] = NULL;
+      $block['content'][0] = mp_blocks_structure_test();
+      break;
+    // case 'mp_contact_map_block':
+    //   global $site_name;
+    //   $phone = $dir = $direc = NULL;
+    //   drupal_add_js('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false', 'external');
+    //   drupal_add_js("https://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobox/src/infobox.js");
+    //   drupal_add_js(drupal_get_path('module', 'ms_blocks') . '/js/ms_bloks_contact_map.js');
+    //   $block['subject'] = '';
+
+    //   if (is_current_microsite()) {
+    //     global $ms_uid, $ms_id, $ms_type;
+    //     $user = user_load($ms_uid);
+    //     $nodo = node_load($ms_id);
+    //     if ($ms_type == NETWORK_PORTAL) {
+    //       $logo = field_get_items('user', $user, 'field_user_picture');
+    //       $logo = $logo[0]['uri'];
+    //       $domain = field_get_items('node', $nodo, 'field_domain');
+    //       $domain = $domain[0]['value'];
+    //       $phones = field_get_items('node', $nodo, 'field_cell_phone');
+    //       $phones = $phones[0]['value'];
+    //       // direccion.
+    //       $dir = field_get_items('node', $nodo, 'field_address');
+    //       $dir = $dir[0]['value'];
+    //       //latLng para generar el mapa.
+    //       $direc = field_get_items('node', $nodo, 'field_map_point');
+    //     }else{
+    //       $logo = field_get_items('node', $nodo, 'field_microsite_logo');
+    //       $logo = $logo[0]['uri'];
+    //       $domain = field_get_items('node', $nodo, 'field_domain');
+    //       $domain = $domain[0]['value'];
+
+    //       $phones = field_get_items('node', $nodo, 'field_cell_phone');
+    //       $phones = $phones[0]['value'];
+    //       // direccion.
+    //       $dir = field_get_items('node', $nodo, 'field_address');
+    //       $dir = $dir[0]['value'];
+    //       //latLng para generar el mapa.
+    //       $direc = field_get_items('node', $nodo, 'field_map_point');
+    //     }
+    //   }
+    //   else{
+    //     $logo = theme_get_setting('logo_path');
+    //     $user = user_load(1);
+    //     $domain = l('www.monetisoft.com', 'http://www.monetisoft.com');
+    //     $direc = field_get_items('user', $user, 'field_map_point');
+    //     $dir = field_get_items('user', $user, 'field_address');
+    //     $dir = $dir[0]['value'];
+    //   };
+    //   //Teléfonos.
+    //   if(empty($phones)) {
+    //     $phones = field_get_items('user', $user, 'field_cell_phone');
+    //     $phones = $phones[0]['value'];
+    //   }
+    //   if(!empty($phones)) {
+    //     $phones = explode('|', $phones);
+    //     foreach ($phones as $pkey => $pvalue) {
+    //       $data = explode(':', $pvalue);
+    //       if(empty($items[$data[0]])) {
+    //         $items[$data[0]] = t(str_replace('_', ' ', $data[0])) . ' : ' . $data[1];
+    //       }
+    //       else {
+    //         $items[$data[0]] .= ' -- ' . $data[1];
+    //       }
+    //     }
+    //     foreach ($items as $ikey => $ivalue) {
+    //       $phone .= $ivalue . ' ';
+    //     }
+    //   }
+    //   //direccion completa,
+    //   if(empty($phones)) {
+    //     $dir = field_get_items('user', $user, 'field_address');
+    //     $dir = $dir[0]['value'];
+    //   }
+    //   //latLng para generar el mapa.
+    //   if(empty($phones)) {
+    //     $direc = field_get_items('user', $user, 'field_map_point');
+    //   }
+    //   if (!empty($direc)) {
+    //     $lat = $direc[0]['lat'];
+    //     $lng = $direc[0]['lng'];
+
+    //     $logo_image = theme('image_style',array(
+    //       'style_name' => 'contact_popup_style',
+    //       'path' => $logo,
+    //       'alt' => isset($user->name) ? $user->name : null,
+    //         'title' => isset($user->name) ? $user->name : null,
+    //       )
+    //     );
+    //     $popup_body = array(
+    //       '#prefix' => '<div class="popup-map-body-content">',
+    //       '#suffix' => '</div>',
+    //       'logo'  => array(
+    //         '#prefix' => '<div class="popup-map-body-content logo">',
+    //         '#suffix' => '</div>',
+    //         '#markup' => $logo_image,
+    //       ),
+    //       'address'  => array(
+    //         '#prefix' => '<div class="popup-map-body-content address">',
+    //         '#suffix' => '</div>',
+    //         '#markup' => isset($dir) ? $dir: NULL,
+    //       ),
+    //       'telefono'  => array(
+    //         '#prefix' => '<div class="popup-map-body-content telefonos">',
+    //         '#suffix' => '</div>',
+    //         '#markup' => isset($phone) ? $phone : NULL,
+    //       ),
+    //       'url'  => array(
+    //         '#prefix' => '<div class="popup-map-body-content mail">',
+    //         '#suffix' => '</div>',
+    //         '#markup' => isset($domain) ? $domain: NULL,
+    //       ),
+    //     );
+    //     drupal_add_js(array(
+    //       'msbloksContactMap' => array(
+    //         'lat' => $lat,
+    //         'lng' => $lng,
+    //         'body_content' => render($popup_body)
+    //       )),'setting'
+    //     );
+    //   }
+    //   $block['content'][0] = array(
+    //     '#prefix' => '<div id="map-canvas" style="height:380px; width:900px">',
+    //     '#suffix' => '</div>'
+    //   );
+    //   break;
+    // case 'ms_country_footer_menu':
+    //   $block['subject'] = t('International Monetisoft');
+    //   $block['content'][0] = ms_user_footer_block_menu_content();
+    //   break;
+  }
+  return $block;
+}
+
+
+
+/*
+ * Funcion que me trae toda la estructura de los banners
+*/
+function mp_get_structure_banner(){
+  // drupal_add_css(drupal_get_path('module', 'mp_general_blocks') . '/swiper/css/swiper.min.css',  array('group' => CSS_DEFAULT, 'type' => 'file'));
+  // drupal_add_css(drupal_get_path('module', 'mp_general_blocks') . '/css/mp_general_blocks.css',  array('group' => CSS_DEFAULT, 'type' => 'file'));
+  // drupal_add_js(drupal_get_path('module', 'mp_general_blocks') . '/js/mp_general_blocks.js');
+  // drupal_add_js(drupal_get_path('module', 'mp_general_blocks') . '/swiper/js/swiper.min.js');
+  // creación estructura del banner
+  $structure = array(
+    'container' => array(
+      '#prefix' => '<div class="swiper-container">',
+      '#suffix' => '</div>',
+      'wrapper' => array(
+        '#prefix' => '<div class="swiper-wrapper">',
+        '#suffix' => '</div>',
+      ),
+      // 'pagination' => array(
+      //   '#prefix' => '<div class="swiper-pagination">',
+      //   '#suffix' => '</div>',
+      // ),
+      'prev' => array(
+        '#prefix' => '<div class="swiper-button-prev">',
+        '#suffix' => '</div>',
+      ),
+      'next' => array(
+        '#prefix' => '<div class="swiper-button-next">',
+        '#suffix' => '</div>',
+      ),
+    ),
+  );
+  $image1 = drupal_get_path('module', 'mp_general_blocks') . '/img/slide_uno.jpg';
+  $image1 = theme(
+    'image',
+    array(
+      'path' => $image1,
+      'alt' => 'My company',
+      'text' => 'My company',
+      'width' => 1200,
+      'height' => 300,
+    )
+  );
+
+  $image2 = drupal_get_path('module', 'mp_general_blocks') . '/img/slide_dos.jpg';
+  $image2 = theme(
+    'image',
+    array(
+      'path' => $image2,
+      'alt' => 'My company',
+      'text' => 'My company',
+      'width' => 1200,
+      'height' => 300,
+    )
+  );
+  $image3 = drupal_get_path('module', 'mp_general_blocks') . '/img/slide_tres.jpg';
+  $image3 = theme(
+    'image',
+    array(
+      'path' => $image3,
+      'alt' => 'My company',
+      'text' => 'My company',
+      'width' => 1200,
+      'height' => 300,
+    )
+  );
+  $images = array();
+  $images[0] = $image1;
+  $images[1] = $image2;
+  $images[2] = $image3;
+
+  // Imagenes del banner
+  foreach ($images as $key => $value) {
+    $structure['container']['wrapper'][] = array(
+      '#prefix' => '<div class="swiper-slide">',
+      '#suffix' => '</div>',
+      'slide' . $key => array(
+         '#prefix' => '<div class="swiper-slide">',
+         '#suffix' => '</div>',
+         'img' => array(
+            '#markup' => $value,
+          ),
+      ),
+    );
+  }
+
+  return $structure;
+}
+
+function mp_blocks_social_content() {
+  $items = array();
+  $items['content'] = array(
+    '#prefix' => '<div class="block-content-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $items['content']['social_btton'] = array(
+    '#prefix' => '<div class="ms-social-block-content">',
+    '#suffix' => '</div>',
+    'FaceBtton' => array(
+      '#prefix' => '<span class="facebook sn-header faceBtton-icon-content">',
+      '#suffix' => '</span>',
+      '#markup' => l('Facebook', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'TwBtton' => array(
+      '#prefix' => '<span class="twitter sn-header TwBtton-icon-content">',
+      '#suffix' => '</span>',
+      '#markup' => l('Twitter', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'GmBtton' => array(
+      '#prefix' => '<span class="google sn-header GwBtton-icon-content">',
+      '#suffix' => '</span>',
+      '#markup' => l('Google +', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+  );
+  return $items;
+}
+
+function mp_blocks_menu_footer_first() {
+  $items = array();
+  $items['content'] = array(
+    '#prefix' => '<div class="block-menu-first-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $items['content']['title'] = array(
+    '#markup' => '<h4>' . t('Nuestra web') . '</h4>',
+  );
+  $items['content']['menu_first'] = array(
+    '#prefix' => '<ul class="menu-first-footer">',
+    '#suffix' => '</ul>',
+    'about_us' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('About us', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'mision' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('Mision', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'vision' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('Visión', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'services' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('Services', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+  );
+  return $items;
+}
+
+function mp_blocks_menu_footer_second() {
+  $items = array();
+  $items['content'] = array(
+    '#prefix' => '<div class="block-menu-second-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $items['content']['title'] = array(
+    '#markup' => '<h4>' . t('Debes ver') . '</h4>',
+  );
+  $items['content']['menu_first'] = array(
+    '#prefix' => '<ul class="menu-second-footer">',
+    '#suffix' => '</ul>',
+    'contact-us' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('Contact us', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'articles' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('Articles', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'plate-day' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('Plate day', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'recommended' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('Recommended', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+  );
+  return $items;
+}
+
+function mp_blocks_contact_info_footer_third(){
+  $items = array();
+  $items['content'] = array(
+    '#prefix' => '<div class="block-contact-info-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $items['content']['title'] = array(
+    '#markup' => '<h4>' . t('Contacto') . '</h4>',
+  );
+  $items['content']['menu_first'] = array(
+    '#prefix' => '<div class="menu-contact-info-footer">',
+    '#suffix' => '</div>',
+    'telephone' => array(
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+      '#markup' => t('Telephone') . '1234567',
+    ),
+    'cellphone' => array(
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+      '#markup' => t('Cellphone') . '3101234567',
+    ),
+    'mail' => array(
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+      '#markup' => t('Mail') . 'info@test.com',
+    ),
+    'address' => array(
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+      '#markup' => t('Address') . 'cra 123 # 123',
+    ),
+  );
+  return $items;
+}
+
+function mp_blocks_structure_social_icons(){
+  $items['content'] = array(
+    '#prefix' => '<div class="social-icons social">',
+    '#suffix' => '</div>',
+  );
+  $items['content']['social_icons'] = array(
+    '#prefix' => '<ul class="menu-icons-social">',
+    '#suffix' => '</ul>',
+    'facebook' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('facebook', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'twitter' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('twitter', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'youtube' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('youtube', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+    'instagram' => array(
+      '#prefix' => '<li>',
+      '#suffix' => '</li>',
+      '#markup' => l('instagram', '', array('attributes' => array('target'=>'_blank'))),
+    ),
+  );
+  return $items;
+}
+
+function mp_blocks_structure_test(){
+  $content['content'] = array(
+    '#prefix' => '<div class="content-test">',
+    '#suffix' => '</div>',
+  );
+  for ($i = 0; $i < 10; $i++) {
+    $content['content'][$i] = array(
+      '#prefix' => '<p class="test">',
+      '#suffix' => '</p>',
+      '#markup' => t('esto es un texto de parrafo'),
+    );
+  }
+  return $content;
+}
+// function _get_all_users() {
+//   $js_country = array();
+//   $query = new EntityFieldQuery();
+//   $query = $query->entityCondition('entity_type', 'user')
+//         ->execute();
+//   foreach (reset($query) as $key => $value) {
+//     $user = user_load($value->uid);
+//     $country =  field_get_items('user', $user, 'field_location');
+//     $country = $country[0]['value'];
+//     if (!empty($country)) {
+//       $country = explode('|', $country);
+//       $country = $country[0];
+//       if (!isset($js_country[$country])) {
+//         $coordenadas = _get_address_lon_lat(_get_country_list_by_abbreviation($country));
+//         if($coordenadas) {
+//           $js_country[$country]['lat'] = $coordenadas['lat'];
+//           $js_country[$country]['lon'] = $coordenadas['lon'];
+//         }
+//       }
+//     }
+//   }
+//   return $js_country;
+// }
+// // devuelve la ongitud y latitud apartir de una dirección.
+// function _get_address_lon_lat($address){
+//   $latLng = '';
+//   $address = urlencode($address);
+//   $request_url = "http://maps.googleapis.com/maps/api/geocode/xml?address=".$address."&sensor=true";
+//   $xml = simplexml_load_file($request_url) or die("url not loading");
+//   $status = $xml->status;
+//   if ($status=="OK") {
+//       $lat = $xml->result->geometry->location->lat;
+//       $lon = $xml->result->geometry->location->lng;
+//       $latLng['lat'] = "$lat";
+//       $latLng['lon'] = "$lon";
+//   }
+//   return $latLng;
+// }
+// function ms_user_footer_block_menu_content() {
+//   $query = new EntityFieldQuery();
+//   $result = $query->entityCondition('entity_type', 'taxonomy_term')
+//         ->propertyCondition('vid', COUNTRY_VID, '=')
+//         ->execute();
+//   $result = reset($result);
+//   $link['ul'] = array(
+//     '#prefix' => '<ul class"menu">',
+//     '#suffix' => '</ul>',
+//   );
+//   $array_length = count($result);
+//   $counter = 1;
+//   foreach ($result as $value) {
+//     $tax = taxonomy_term_load($value->tid);
+//     $country_domain = field_get_items('taxonomy_term', $tax, 'field_domain');
+//     $country_domain = $country_domain[0]['value'];
+//     if ($counter == 1) {
+//       $link['ul'][$tax->name][] = array(
+//         '#prefix' => '<li class"first leaf">',
+//         '#suffix' => '</li>',
+//         '#markup' => l(t($tax->name),'http://' . $country_domain),
+//       );
+//     }
+//     elseif ($counter == $array_length) {
+//       $link['ul'][$tax->name][] = array(
+//         '#prefix' => '<li class"last leaf">',
+//         '#suffix' => '</li>',
+//         '#markup' => l(t($tax->name),'http://' . $country_domain),
+//       );
+//     }
+//     else {
+//       $link['ul'][$tax->name][] = array(
+//         '#prefix' => '<li class"leaf">',
+//         '#suffix' => '</li>',
+//         '#markup' => l(t($tax->name),'http://' . $country_domain),
+//       );
+//     }
+//     $counter ++;
+//   }
+//   return $link;
+// }
+
+// function ms_user_trainings_block_content() {
+//   $items = array();
+//   $count = 1;
+//   global $user;
+//   if (user_is_logged_in()) {
+//     $user = user_load($user->uid);
+//     $international_user = 0;
+//     $user_mer_tid = field_get_items('user', $user, 'field_meritocracy');
+//     $user_mer_tid = $user_mer_tid[0]['tid'];
+//     $user_trainings = field_get_items('user', $user, 'field_ms_approved_training');
+//     while ($count <= 8) {
+//       $level = field_get_items('user', $user, 'field_hierarchy_level_' . $count);
+//       if (!empty($level)) {
+//         if ($count == 1) {
+//           $red_user_id = $level[0]['target_id'];
+//           $red_user_id = user_load($red_user_id);
+//           $location = field_get_items('user', $red_user_id, 'field_location');
+//           $location = $location[0]['value'];
+//           $location = explode('|', $location);
+//           if ($location[0] != 'co') {
+//             $international_user ++;
+//           }
+//         }
+//         $user_red['level_' . $count] = count($level);
+//       }
+//       else {
+//         $user_red['level_' . $count] = 0;
+//       }
+//       $count ++;
+//     }
+//     $info = ms_rule_by_user_get_info($user->uid);
+//     $info = !empty($info) ? unserialize($info[0]->content) : NULL;
+//     if (!empty($user_red)) {
+
+//       $info = ms_rule_by_user_get_info($user->uid);
+//       $info = !empty($info) ? unserialize($info[0]->content) : NULL;
+//       $user_rank = array();
+//       $t_ranking = 0;
+//       if (isset($info)) {
+//         foreach ($info as $key => $value) {
+//           if (isset($value['tid']) && $value['tid'] == $user_mer_tid) {
+//             $count = 1;
+//             $t_ranking ++;
+//             $user_rank_bool = FALSE;
+//             while ($count <= 8) {
+//               $user_needs['level_' . $count] = $value['user_level_' . $count];
+//               if ($value['user_level_' . $count] <= $user_red['level_' . $count]) {
+//                 if ($value['user_level_' . $count]) {
+//                   $user_rank_bool = TRUE;
+//                 }
+//               }
+//               $count ++;
+//             }
+//             if (($user_rank_bool) && ($value['training'] <= $user_trainings) && ($value['international_user'] <= $international_user)) {
+//               $user_rank['actual_rank'] = $value['ranking'];
+//               $user_rank['trainins_needs'] = $value['training'];
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+//   return $items;
+// }
+

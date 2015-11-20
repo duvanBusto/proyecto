@@ -1,0 +1,5 @@
+name = management general blocks
+description = Este modulo controla todos los bloques generales de la página
+core = 7.x
+package = MANAGEMENT PAGE
+

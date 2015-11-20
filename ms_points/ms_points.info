@@ -1,0 +1,4 @@
+name = Point system
+description = Sistema de puntos en la red
+core = 7.x
+package = MS

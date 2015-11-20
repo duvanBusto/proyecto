@@ -1,0 +1,4 @@
+name = Test time out
+description = prueba de tiem out
+core = 7.x
+package = Management

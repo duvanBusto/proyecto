@@ -1,0 +1,269 @@
+<?php
+
+/**
+ * @file
+ * En este archivo se gestiona el contenido del home
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function mp_homepage_menu() {
+  // Home
+  $items['homepage'] = array(
+    'title' => 'Nuestro restaurante',
+    'page callback' => 'mp_homepage_content',
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_init().
+ */
+function mp_homepage_init() {
+  global $home_id;
+  $homepage = node_load(5);
+  $home_id = $homepage->nid;
+}
+/**
+ *
+ */
+function mp_homepage_content(){
+  global $home_id;
+  // dpm($home_id,'nid');
+  $node_home = node_load($home_id);
+  // dpm($node_home,'nodo');
+  $imgs_fids = $node_home->field_plate_one_img[LANGUAGE_NONE];
+  $content = array(
+    'container_homepage' => array(
+      '#prefix' => '<div class="container-fluid container-homepage">',
+      '#suffix' => '</div>',
+      // 'content' => array(
+        // '#prefix' => '<div class="row content-homepage-custom">',
+        // '#suffix' => '</div>',
+        'container-columns' => array(
+          '#prefix' => '<div class="row content-homepage-custom">',
+          '#suffix' => '</div>',
+          'column_left' => array(
+            '#prefix' => '<div class="col-md-6 text-justify">',
+            '#suffix' => '</div>',
+            '#markup' => render($node_home->field_column_left[LANGUAGE_NONE][0]['value']),
+          ),
+          'column_rigth' => array(
+            '#prefix' => '<div class="col-md-6 text-justify">',
+            '#suffix' => '</div>',
+            '#markup' => render($node_home->field_column_rigth[LANGUAGE_NONE][0]['value']),
+          ),
+        ),
+        'container_imgs' => array(
+          '#prefix' => '<div class="row container-plates-imgs">',
+          '#suffix' => '</div>',
+          'content' => array(
+            '#prefix' => '<div class="content-imgs">',
+            '#suffix' => '</div>',
+          ),
+        ),
+        'container_postmain' => array(
+          '#prefix' => '<div class="row container-postmain" style="margin-bottom: 5px;">',
+          '#suffix' => '</div>',
+          'title' => array(
+            '#prefix' => '<h2>',
+            '#suffix' => '</h2>',
+            '#markup' => $node_home->field_title_postmain['und'][0]['value'],
+          ),
+          'column_left' => array(
+            '#prefix' => '<div class="col-md-6 text-justify">',
+            '#suffix' => '</div>',
+            '#markup' => render($node_home->field_post_main_left[LANGUAGE_NONE][0]['value']),
+          ),
+          'content_rigth' => array(
+            '#prefix' => '<div class="col-md-6 text-justify">',
+            '#suffix' => '</div>',
+            '#markup' => render($node_home->field_post_main_rigth[LANGUAGE_NONE][0]['value']),
+          ),
+          'img_sumary' => array(
+            '#prefix' => '<div class="col-md-12 img-sumary" style="margin: 28px 0px;">',
+            '#suffix' => '</div>',
+          ),
+
+        ),
+      // ),
+    ),
+  );
+
+
+
+
+
+ //PRUEBAS
+  //ingresar dos usuarios mismo mes dos rows (revisar inserta, agrega, y redime)
+  //ingresar dos usuarios mismo mes ( actualizacion - suma puntos )
+  //redime puntos a usuarios en el mismo mes (revisar agrega puntos, actualiza historial)
+  //ingresar dos usuarios diferente mes con fecha anterior (error)
+  //ingresar dos usuarios diferente mes uno
+  //ingresar dos usuarios diferente mes dos
+  //agregar puntos a los usuarios diferente mes actualizacion
+  //obtener los puntos del usuario de un mes
+  //obtener el historial del usuario
+  //actualizar los campos del usuario
+  //obtner el porcentaje de rango de un usuario
+
+  //UIDS
+  //2251
+  //2381
+  //1651
+  //3129
+  // db_truncate('ms_points')->execute();
+  // $query_del = db_delete('ms_points_range')
+  // ->condition('accumulated_points', 1)
+  // ->execute();
+
+  // Sistema de rango de puntos
+  // --Inicia puntos
+  // ms_points_initiate(7);
+  // ms_points_initiate(8);
+  // --Agrega puntos
+  // ms_points_add_points_by_uid(RANGE_POINTS, 7, 30, 'nueva descripcion');
+  // ms_points_add_points_by_uid(RANGE_POINTS, 8, 40, 'nueva descripcion');
+  // --Actualiza el usuario
+  // ms_points_update_user(7, RANGE_POINTS, 'cambio de nombre octubre', 'actualizacion test');
+  // ms_points_update_user(8, RANGE_POINTS, 'cambio de nombre test octubre', 'actualizacion test');
+  //--- Obtener el historial
+  // $hisone = ms_points_get_history_points_by_uid(RANGE_POINTS, 7);
+  // $histwo = ms_points_get_history_points_by_uid(RANGE_POINTS, 8);
+  // dpm($hisone,'historial uno de 7');
+  // dpm($histwo,'historial dos de 8');
+  //--- Obtener los puntos de un mes
+  // $timenov = strtotime('28-10-2015 23:20');//@temporal
+  // $timeoct = strtotime('28-10-2015 23:20');//@temporal
+  // $pointNov = ms_points_get_points_by_uid(RANGE_POINTS, 7, $timeoct);
+  // $pointOct = ms_points_get_points_by_uid(RANGE_POINTS, 8, $timeoct);
+  // dpm($pointNov, 'puntos de octubre 7');
+  // dpm($pointOct, 'puntos de octubre 8');
+  //--- Obtener el porcentaje de rango (funcion estatica)
+  // $points_static = ms_points_stactic_get_percentage_commission();
+  // dpm($points_static,'rango estatica');
+  //--- Obtener el porcentaje de rango (funcion dinamica)
+  // $points_dinamic = ms_points_get_percentage_commission(7);
+  // dpm($points_dinamic,'rango dinamica 7');
+  // $points_dinamic = ms_points_get_percentage_commission(8);
+  // dpm($points_dinamic,'rango dinamica 8');
+
+  // Prueba de funcion fecha inicial y final
+  // $timeoct = strtotime('26-01-2015 23:20');//@temporal ok
+  // $timeoct = strtotime('08-01-2016 23:40');//@temporal ok
+
+  // Sistema de puntos
+  //---Agrega puntos
+  // ms_points_add_points_by_uid(SYSTEM_POINTS, 7, 20, 'nueva descripcion');
+  // ms_points_add_points_by_uid(SYSTEM_POINTS, 8, 20, 'nueva descripcion');
+  //---Redime puntos
+  // ms_points_redeem_points_by_uid(7, 30);
+  // ms_points_redeem_points_by_uid(8, 30);
+  //---Actualiza usuarios
+  // ms_points_update_user(7, SYSTEM_POINTS, 'actualizacion test', 'actualizacion test');
+  // ms_points_update_user(8, SYSTEM_POINTS, 'actualizacion test', 'actualizacion test');
+  //---Obtiene los puntos de un usuario
+  // $pointsOne = strtotime('28-10-2015 23:20');//@temporal
+  // $pointsTwo = strtotime('28-10-2015 23:20');//@temporal
+  // $pointNov = ms_points_get_points_by_uid(SYSTEM_POINTS, 7);
+  // $pointOct = ms_points_get_points_by_uid(SYSTEM_POINTS, 8);
+  // dpm($pointNov, 'puntos de usuario 7');
+  // dpm($pointOct, 'puntos de usuario 8');
+  //---Obtiene el historial del usuario
+  // $hisone = ms_points_get_history_points_by_uid(SYSTEM_POINTS, 7);
+  // $histwo = ms_points_get_history_points_by_uid(SYSTEM_POINTS, 8);
+  // dpm($hisone,'historial de usuario 7');
+  // dpm($histwo,'historial de usuario 8');
+  //---Cambiar el estatus del usuario
+  // ms_points_update_user_status(1, SYSTEM_POINTS, 7);
+
+  // $query = db_select('ms_points', 'msp')
+  //   ->fields('msp')
+  //   ->execute()->fetchAll();
+  // dpm($query,'query resultado');
+  // foreach ($query as $key => $value) {
+  //   dpm('-------------------------------------------');
+  //   dpm($value,'valor');
+  //   dpm('-------------------------------------------');
+  // }
+
+  // $query = db_select('ms_points_range', 'msp')
+  //   ->fields('msp')
+  //   ->execute()->fetchAll();
+  // dpm($query,'query resultado');
+  // foreach ($query as $key => $value) {
+  //   dpm('-------------------------------------------');
+  //   dpm($value,'valor');
+  //   dpm(date('d/m/Y H:i',$value->init_date),'fecha inicla');
+  //   dpm(date('d/m/Y H:i',$value->update_date),'update');
+  //   dpm(date('d/m/Y H:i',$value->finish_date),'fecha final');
+  //   dpm('-------------------------------------------');
+  // }
+
+
+
+
+  // Recorro las imagenes de  los platos
+  foreach ($imgs_fids as $key => $img) {
+    // dpm($img,'value');
+    $fid = $img['fid'];
+    $image = file_load($fid);
+    // dpm($image,'image');
+    $img_plate = array(
+      '#markup' => theme(
+        'image_style',
+          array(
+            'path' => !isset($image->uri)?'public://default_images/avatar.png':$image->uri,
+            'style_name' => '160x160',
+            'height' => '170px',
+            'width' => '600px',
+            'attributes' => array(
+              'class' => !isset($image->uri) ? array('img-responsive','avatar_default','img-circle') : array('img-responsive','img-circle'),
+              'style' => 'margin: 0 auto;',
+            ),
+          )
+      ),
+    );
+    $content['container_homepage']['container_imgs']['content'][] = array(
+      'img_' . $fid => array(
+        '#prefix' => '<div class="col-md-4">',
+        '#suffix' => '</div>',
+        '#markup' => '<br>'. render($img_plate),
+      ),
+    );
+  }
+  // Image sumary
+  $fid_sm = $node_home->field_sumary_img[LANGUAGE_NONE][0]['fid'];
+  $image_sm = file_load($fid_sm);
+  // dpm($image_sm);
+  // dpm($image,'image');
+  $img_plate_sumary = array(
+    '#markup' => theme(
+      'image_style',
+        array(
+          'path' => !isset($image_sm->uri)?'public://default_images/avatar.png':$image_sm->uri,
+          'style_name' => '650x200',
+          // 'height' => '170px',
+          // 'width' => '170px',
+          'attributes' => array(
+            'class' => !isset($image_sm->uri) ? array('img-responsive','avatar_default') : array('img-responsive'),
+            'style' => 'margin: 0 auto;',
+          ),
+        )
+    ),
+  );
+  $content['container_homepage']['container_postmain']['img_sumary'][] = array(
+    'img_' . $fid => array(
+      '#prefix' => '<div class="col-md-12">',
+      '#suffix' => '</div>',
+      '#markup' => render($img_plate_sumary),
+    ),
+  );
+  return $content;
+}
+
+

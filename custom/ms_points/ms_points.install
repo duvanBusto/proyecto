@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function ms_points_schema() {
+  $schema['ms_points'] = array(
+    'description' => 'Table with system points ',
+    'fields' => array(
+      'id' => array(
+        'description' => 'serial identificador del registro',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'Identificador unico del usuario que tiene el rango de puntos',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Nombre del usuario con puntos',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'accumulated_points' => array(
+        'description' => 'Number points accumulated',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'user_status' => array(
+        'description' => 'User status with points',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created' => array(
+        'description' => 'Register date points',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'history_points' => array(
+        'description' => 'Show history points',
+        'type' => 'blob',
+        'size' => 'big',
+        // 'serialize' => TRUE
+      ),
+      'data' => array(
+        'description' => 'Aditional info',
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  // Range points and comissions
+  $schema['ms_points_range'] = array(
+    'description' => 'Table with points range and comissions',
+    'fields' => array(
+      'id' => array(
+        'description' => 'serial identificador del registro',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'Identificador unico del usuario que tiene el rango de puntos',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Nombre del usuario con puntos',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'accumulated_points' => array(
+        'description' => 'Number points accumulated',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'user_status' => array(
+        'description' => 'User status with points',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'init_date' => array(
+        'description' => 'Finish date points range',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'finish_date' => array(
+        'description' => 'Init date points range',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'update_date' => array(
+        'description' => 'Update date points range',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'Register date points',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'history_points' => array(
+        'description' => 'Show history points',
+        'type' => 'blob',
+        'size' => 'big',
+      ),
+      'data' => array(
+        'description' => 'Aditional info',
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+
